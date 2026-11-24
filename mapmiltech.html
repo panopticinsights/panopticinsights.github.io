@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Карта сфер влияния и рынков беспилотных технологий — 2026</title>
+<style>
+:root{
+  --bg:#0b1220;--bg2:#101a2d;--card:#152238;--card2:#1b2b47;--line:#24365a;
+  --tx:#e6edf7;--tx2:#9fb0c9;--tx3:#64748b;
+  --usnato:#2f6fed;--gulf:#c9a227;--indopac:#7c5cd6;--russia:#a13d2d;--china:#d64545;
+  --multiv:#e08a3c;--ukraine:#2fae60;--neutral:#5b6b80;
+  --hi:#22c55e;--mid:#eab308;--low:#f59e0b;--vlow:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.45 -apple-system,'Segoe UI',Roboto,Arial,sans-serif}
+header{padding:18px 22px 10px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#0d1730,#0b1220)}
+header h1{font-size:19px;font-weight:700}
+header .sub{color:var(--tx2);font-size:12.5px;margin-top:4px}
+header .sub b{color:var(--tx)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 22px;border-bottom:1px solid var(--line);background:var(--bg2)}
+.pill{border:1px solid var(--line);background:var(--card);color:var(--tx2);border-radius:16px;padding:5px 11px;font-size:12px;cursor:pointer;user-select:none;transition:.15s}
+.pill:hover{border-color:#3d5a8f;color:var(--tx)}
+.pill.active{background:#2450b3;border-color:#4f7fe0;color:#fff}
+.pill.all.active{background:#1f8a4c;border-color:#35c06c}
+.mode{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:auto}
+.mode button{background:var(--card);color:var(--tx2);border:0;padding:6px 12px;font-size:12px;cursor:pointer}
+.mode button.active{background:#2450b3;color:#fff}
+.wrap{display:flex;gap:14px;padding:16px 22px;align-items:flex-start}
+.mapzone{flex:1 1 68%;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(18,1fr);grid-auto-rows:64px;gap:6px}
+.tile{position:relative;border-radius:9px;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.15s;padding:3px;text-align:center;overflow:hidden}
+.tile:hover{transform:translateY(-2px);border-color:#5b7bb0;z-index:2;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+.tile.dim{opacity:.28;filter:saturate(.4)}
+.tile .fl{font-size:17px;line-height:1}
+.tile .nm{font-size:10.5px;font-weight:600;margin-top:2px;color:var(--tx)}
+.tile .bd{font-size:8.5px;color:var(--tx3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tile .sc{position:absolute;top:3px;right:4px;font-size:9px;font-weight:700;color:#fff;border-radius:4px;padding:1px 4px;background:#000a}
+.tile .b1{position:absolute;top:3px;left:4px;font-size:8px;color:#fff;background:#000a;border-radius:4px;padding:0 4px}
+.tile.bigsel{outline:2px solid #fff;outline-offset:-1px}
+.panel{flex:0 0 360px;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;position:sticky;top:12px;max-height:calc(100vh - 40px);overflow:auto}
+.panel h2{font-size:17px;display:flex;align-items:center;gap:8px}
+.panel .sphere{display:inline-block;font-size:10.5px;border-radius:6px;padding:2px 8px;color:#fff;margin:8px 0 6px}
+.panel .meta{color:var(--tx2);font-size:12px;margin-bottom:10px}
+.seg{border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin-bottom:8px;background:var(--bg2)}
+.seg .sh{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.seg .sn{font-weight:700;font-size:12.5px}
+.seg .ss{font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;color:#fff}
+.seg .kv{display:flex;gap:8px;font-size:11px;color:var(--tx2);margin-top:4px}
+.seg .kv b{color:var(--tx);font-weight:600}
+.seg .note{font-size:11px;color:var(--tx2);margin-top:5px;border-top:1px dashed var(--line);padding-top:5px}
+.legend{margin-top:14px;display:flex;flex-wrap:wrap;gap:9px 14px;font-size:11.5px;color:var(--tx2);align-items:center}
+.leg{display:flex;align-items:center;gap:5px}
+.leg i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.legend .hint{width:100%;color:var(--tx3);font-size:11px}
+table.rank{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px}
+table.rank th{background:var(--card2);color:var(--tx2);text-align:left;padding:7px 9px;font-size:11px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap}
+table.rank td{padding:6px 9px;border-bottom:1px solid #1a2946;color:var(--tx2)}
+table.rank tr:hover td{background:#182644;color:var(--tx)}
+table.rank .cn{font-weight:600;color:var(--tx)}
+.tagv{display:inline-block;border-radius:5px;padding:1px 7px;font-size:10px;color:#fff}
+.hi{background:var(--hi)}.mid{background:var(--mid)}.low{background:var(--low)}.vlow{background:var(--vlow)}
+.sechead{margin-top:22px;font-size:14px;font-weight:700}
+footer{padding:14px 22px;border-top:1px solid var(--line);color:var(--tx3);font-size:11px}
+@media(max-width:1100px){.wrap{flex-direction:column}.panel{max-width:100%;position:static;flex:auto}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛰️ Карта сфер влияния и рынков беспилотных технологий</h1>
+  <div class="sub"><b>8 сегментов</b> · Интерцепторы/C-UAS · Дроны · РЭБ · UGV · Морские · Компоненты · Софт/AI · Наведение ·&nbsp; Скоринг из позиции «поставщик Украины/ЕС» · Данные верифицированы <b>2026-11-23</b> · Методика: <b>00_методология_и_скоринг.md</b></div>
+</header>
+<div class="controls" id="pills"></div>
+<div class="wrap">
+  <div class="mapzone">
+    <div class="grid" id="grid"></div>
+    <div class="legend" id="legend"></div>
+    <div class="sechead">📋 Рейтинг пар «страна × сегмент» (клик по заголовку — сортировка)</div>
+    <table class="rank" id="rank"></table>
+  </div>
+  <aside class="panel" id="panel"></aside>
+</div>
+<footer>Тайловая карта — стилизованная схема (позиции приблизительные). Оценки A–D и полные источники каждого факта — в папке <b>верификация/G1–G8.md</b>; профили стран — <b>04_страновые_профили.md</b>; веса скоринга — <b>00_методология_и_скоринг.md</b>. Балл = 0.20·P1 + 0.15·P2 + 0.15·P3 + 0.15·P4 + 0.10·P5 + 0.10·P6 + 0.05·P7 + 0.05·P8 + 0.05·P9 (пересчитывается на странице).</footer>
+<script>
+const SEG = {
+  cuas:{n:'Интерцепторы/C-UAS',c:'#e05656'},
+  drones:{n:'Ударные/развед. БПЛА',c:'#4fa3e3'},
+  ew:{n:'РЭБ/РЭР',c:'#b06fd8'},
+  ugv:{n:'Наземные UGV',c:'#5aa17f'},
+  maritime:{n:'Морские USV/UUV',c:'#3fb5c9'},
+  components:{n:'Компоненты/сенсоры',c:'#d8a94f'},
+  software:{n:'Военный софт/AI',c:'#7f8fe8'},
+  guidance:{n:'Наведение/автономия',c:'#e8875f'}
+};
+const SPH = {
+  usnato:{n:'НАТО/ЕС (атлантическая сфера)',c:'#2f6fed'},
+  gulf:{n:'Залив (союзники США, суверенные)',c:'#c9a227'},
+  indopac:{n:'Индо-Пацифика (союзники США)',c:'#7c5cd6'},
+  russia:{n:'Ось РФ/Иран/КНДР (не рынки входа)',c:'#a13d2d'},
+  china:{n:'Орбита Китая (конкурент)',c:'#d64545'},
+  multiv:{n:'Мульти-векторные',c:'#e08a3c'},
+  ukraine:{n:'Украина — домашний рынок/полигон',c:'#2fae60'},
+  neutral:{n:'Периферия (мониторинг)',c:'#5b6b80'}
+};
+// p7,p8,p9 — контекст страны; в segs: {s, m (объём), g (рост), big (≥$1B/год), p1..p6, pr (программы), pl (игроки), ch (канал входа), nt (заметка)}
+const C = [
+{id:'us',n:'США',fl:'🇺🇸',col:2,row:2,sph:'usnato',bud:'$1.45 трлн (FY27 запрос, +44%)',p7:9,p8:9,p9:7,
+ segs:[
+ {s:'cuas',m:'$3.7–20.6 млрд/год',g:'+67% г/г; ×3.2 за 2 года',big:1,p1:9,p2:10,p3:10,p4:7,p5:6,p6:8,pr:'LIDS; JIATF-401 «Domestic Shield» ~$4.15B; NGCM/XRC; E-HEL; DE-пилот Epirus',pl:'RTX, Leonardo DRS, Anduril ($20B рамка), AeroVironment, SRC',ch:'Drone Dominance Gauntlet (SkyFall победил); Blue List; JIATF OT; Domestic Shield',nt:'Скорость: rodeo 16.11.2026 → 400 дронов к 01.03.2027'},
+ {s:'drones',m:'$9.4 млрд FY26 + CCA $2.37B FY27 + DDP $1.0–1.1B',g:'«×1000% к $54B» (DDP)',big:1,p1:10,p2:10,p3:10,p4:7,p5:5,p6:8,pr:'EO 14307; Gauntlet 1/2/2.5 (30k+60k+8k); CCA Inc.1/2; LASSO ~$1.2B/6л',pl:'GA-ASI, AeroVironment, Anduril, Textron, Shield AI; UA: SkyFall, Skyeton ($10.64M US Army), F-Drones (2 000 F10)',ch:'Gauntlet + US-«дочка»; Blue UAS List; Manufacturing Rodeo ($3k/FPV)',nt:'Group 1–2 = расходники; US-сборка обязательна (EO 14307)'},
+ {s:'ew',m:'~$2–3 млрд/год',g:'+59% FY26→FY27',big:1,p1:8,p2:8,p3:8,p4:5,p5:4,p6:5,pr:'TLS/TLS Manpack; EMO AdvTech ×6; M-SHORAD',pl:'BAE, L3Harris, SRC, Sierra Nevada, Epirus',ch:'модули в US-платформы (M-LIDS-модель); Collins публично зовёт «украинский опыт»',nt:'ITAR-строгий сегмент; вход только модулями/субподрядом'},
+ {s:'ugv',m:'~$0.2–0.4 млрд явных строк',g:'смена парадигмы (RCV отменён)',big:0,p1:3,p2:6,p3:6,p4:8,p5:8,p6:8,pr:'UxS Autonomy ($15.5M трём стартапам); EABC; ROADS',pl:'Applied Intuition, Forterra, Overland AI, Textron',ch:'xTech/SBIR; техника Army + 8–10 дней на демо',nt:'идеология attritable совпадает с украинской'},
+ {s:'maritime',m:'$2–4 млрд/год; MUSV $1.2B одним заказом (09.2026)',g:'CAGR 41.7% (FY22–27)',big:1,p1:8,p2:10,p3:9,p4:8,p5:7,p6:8,pr:'MUSV Phase I/II + Drones.mil; Orca $1.13B FYDP; Replicator 2',pl:'Saronic ($1.75B раунд), HII, Galliano/Edison Chouest, Boeing',ch:'MUSV Phase II (rolling 5 лет); UFORCE–ReconCraft MoU (MAGURA в США, 07.2026)',nt:'якорь цены $40M/MUSV; TRL-высокий обязателен'},
+ {s:'components',m:'>$1B фактически (60% недопоставка Gauntlet-1)',g:'регуляторный шок NDAA/FCC/DFARS',big:1,p1:6,p2:9,p3:9,p4:8,p5:7,p6:8,pr:'Blue UAS Framework (135 компаний); DFARS 7052 (РЗЭ-магниты с 01.2027)',pl:'Unusual Machines, KDE, EM&T, Teledyne FLIR, Auterion',ch:'Blue Framework-листинг; B2B к Blue List-платформам; dual-use (Oko Camera)',nt:'самый недооценённый сегмент; дефицит NDAA-деталей'},
+ {s:'software',m:'~$2.3 млрд FY27 (MSS+JFN) + рамки $10B/$20B',g:'кратный; Maven = program of record',big:1,p1:8,p2:9,p3:10,p4:6,p5:3,p6:8,pr:'Maven PoR; Army–Palantir EA $10B/10л; MSS NATO',pl:'Palantir (54% AI-денег), Anduril, Booz, Scale',ch:'task orders под рамками; DIU CSO; ПО — наименее ITAR-загрязнено',nt:'winner-take-most; вход через интеграцию, не «свой мегаконтракт»'},
+ {s:'guidance',m:'нет чистой строки; Launched Effects R&D $876M',g:'×2.2 R&D FY27',big:0,p1:6,p2:9,p3:9,p4:7,p5:6,p6:9,pr:'Replicator; CCA-автономия (Anduril/Shield AI/Collins); LASSO Block 2',pl:'Anduril, Shield AI, Applied Intuition; UA: Swarmer (IPO +520%)',ch:'лицензирование OEM; Gauntlet как часть заявки',nt:'дифференциатор — «100k+ боевых миссий» (данные UA)'}]},
+{id:'ca',n:'Канада',fl:'🇨🇦',col:2,row:1,sph:'usnato',bud:'CAD $65.9→89B/год; DDI $2.3B/5л',p7:9,p8:9,p9:5,
+ segs:[{s:'cuas',m:'~CAD $460M/год (все дроны/C-UAS)',g:'рост к 5% ВВП (pledge)',big:0,p1:3,p2:7,p3:6,p4:9,p5:8,p6:9,pr:'Defence Drone Initiative; Joint CUAS Office (сэндбоксы)',pl:'GDLS-Canada, MDA, Draganfly',ch:'IDEaS: челленджи → POINT follow-on до $20M; DDI-маркетплейс (открыт для UA)',nt:'самый дешёвый полигон для NATO-референса; объём мал'}]},
+{id:'pl',n:'Польша',fl:'🇵🇱',col:9,row:2,sph:'usnato',bud:'~$53–55B (4.8% ВВП) + EU SAFE €43.7B; дроны 2026: €5.9B',p7:8,p8:9,p9:6,
+ segs:[
+ {s:'cuas',m:'SAN ~$3.7 млрд (18 батарей, 2026–27)',g:'с нуля (2024) → крупнейший контракт ЕС',big:1,p1:8,p2:10,p3:10,p4:8,p5:8,p6:9,pr:'SAN (PGZ+Kongsberg, EU SAFE, перехватчики внутри!); Tarcza Wschód PLN 10B; PET/PCL PLN 3.9B; Weibel €84M',pl:'PGZ, Kongsberg, PIT-RADWAR, Weibel, Perennial (MEROPS)',ch:'слот эффекторов в SAN через PGZ/Kongsberg; OSA-центр (Устка); рамка→исполнительный контракт за 7 мес',nt:'национального чемпиона-перехватчика НЕТ — открытая ниша; AU-кейс: TAF×PGZ'},
+ {s:'drones',m:'пакет WB PLN 10B (€3B+, 05.2026): >400 Warmate + 190 FlyEye + 12 Gladius; рамка ~10 000 Warmate',g:'PLN 0.1B → 25B за 3 года',big:1,p1:8,p2:10,p3:9,p4:8,p5:6,p6:9,pr:'Warmate-рамка (10k); FlyEye >400; MQ-9B €277M; Pelargonia (OSA)',pl:'WB Group (чемпион), GA-ASI, релоканты UA',ch:'TAF Industries×PGZ завод (июнь 2026, «МиГ-29→технологии»); OSA; ВПОТ',nt:'WB не закрывает объём — окно в FPV/deep-strike/узлах'},
+ {s:'ew',m:'~$0.6–1 млрд/год (ASELSAN $410M + Saab, PLN 2.5B)',g:'CAGR ~30% ($0.5B→$1.9B к 2031)',big:0,p1:5,p2:10,p3:8,p4:8,p5:8,p6:9,pr:'SAN EW-слой; PET/PCL пассивные радары; WRE',pl:'ASELSAN, Saab, PIT-RADWAR',ch:'прямые тендеры Агентства вооружений (иностранцы уже выигрывают!)',nt:'национального EW-чемпиона нет'},
+ {s:'ugv',m:'<$50M/год',g:'ранний',big:0,p1:2,p2:7,p3:6,p4:9,p5:9,p6:9,pr:'Tarantula (96 шт.); Kuna (на вооружении 09.2026)',pl:'PIAP, WIT/Mista, ARX',ch:'JV с PGZ — уже анонсировано с UA-компанией (09.2026)',nt:'пустая ниша; UA-аргумент «100k+ миссий UGV»'}]},
+{id:'de',n:'Германия',fl:'🇩🇪',col:8,row:2,sph:'usnato',bud:'€119.7B (2.6% ВВП) → €139.7B (2027)',p7:9,p8:9,p9:7,
+ segs:[
+ {s:'cuas',m:'€1.5–2+ млрд/год (2026–27)',g:'бюджет ×2 за 3 года',big:1,p1:8,p2:10,p3:9,p4:6,p5:6,p6:6,pr:'ARGUS €1.1B/7л (450 систем); TYTAN «неск. сотен млн»; Diehl GARMR 48; Skyranger >600; EDDI; полиция >€100M',pl:'Hensoldt, Rheinmetall, Diehl, TYTAN (завод 3 000/мес), ARGUS, ARX',ch:'сборка/JV в DE (ARX×Roboneers); TYTAN-прецедент: ВСУ-тест → контракт BAAINBw без конкурса',nt:'⚠️ директива «safe states» (02.11.2026): COTS-компоненты UA дисквалифицированы — только сборка в ЕС'},
+ {s:'drones',m:'€10 млрд «в ближайшие годы» (≈€1.5–2B/год)',g:'с нуля (2024) → рамки €2.4B',big:1,p1:7,p2:9,p3:8,p4:5,p5:5,p6:6,pr:'лоитеринг-рамка €2.4B (Helsing €540M + Rheinmetall €300M); полк дронов 2027; nnUAS',pl:'Helsing ($18B), Stark, Rheinmetall, Quantum ($8B), Auterion',ch:'«деньги DE → производство UA»: €400M дальние + €200M + €1B перехватчики + 50k Shrike; EDF (STRATUS с UA-субподрядом)',nt:'потолок €1B/поставщик = слот для 3–4-го игрока'},
+ {s:'ew',m:'~€0.5 млрд/год («близко»)',g:'генерационная замена',big:0,p1:5,p2:8,p3:8,p4:6,p5:6,p6:7,pr:'GeSys SgK €400M; Knifefish/Sawfish (DE+NL); IGEL-консорциум',pl:'Hensoldt, R&S, Plath, GDELS',ch:'JV с инкумбентом; через NL-ветку Knifefish',nt:'поставка 2031–32 — медленно по меркам UA'}]},
+{id:'uk',n:'Великобритания',fl:'🇬🇧',col:5,row:2,sph:'usnato',bud:'£68.3B; DIP >£5B на дроны до 2030',p7:9,p8:9,p9:5,
+ segs:[
+ {s:'drones',m:'>£1.2 млрд/год + пакеты ВСУ £260–600M/год',g:'поставки UA ×10 за год',big:1,p1:8,p2:10,p3:9,p4:9,p5:6,p6:10,pr:'DIP (>£5B, ринг-фенс); Corvus (Tekever £400M); NYX; RAPSTONE; поддержка UA 2027 >£10B',pl:'Tekever ($580M раунд), Malloy, BAE, BlueBear; UA: Ukrspecsystems (£200M завод)',ch:'⚠️ 21.11.2026: производство UA middle/deep-strike в UK на UK-деньги (≥80% — UK-компаниям → JV)',nt:'самый формализованный двусторонний канал Европы: данные фронта (06.2025) → tech-sharing (09.2025) → заводы (11.2026)'},
+ {s:'cuas',m:'~£0.8–0.9 млрд + пакеты (£600M/£240M)',g:'институционализация LCADE→LEAP',big:0,p1:6,p2:9,p3:8,p4:9,p5:7,p6:10,pr:'LCADE (Frankenburg/Greenjets/Cambridge); LEAP (5 стран, 2027); Wolfram RF-DEW (100+ дронов)',pl:'Thales UK (LMM), Cambridge Aerospace ($300M), Greenjets',ch:'Commercial X/NAD; Octopus (совместный перехватчик с UA)',nt:'«low-cost» в названии программы = ориентир <$100k/эффектор'},
+ {s:'ew',m:'~£0.6–0.9 млрд/год',g:'восстановление CEMA',big:0,p1:5,p2:8,p3:8,p4:9,p5:7,p6:9,pr:'CEMA Command $3.3B/4г; Crenic $172M; Cornerstone; MEWP',pl:'Roke, Leonardo UK, Thales UK, MBDA UK',ch:'EWBR1-шаблон: RFI (08.07) → контракты (08.09) — 2 месяца; товары, не сервисы',nt:'юридически оформленный доступ UK-компаний к данным UA для AI'},
+ {s:'maritime',m:'мал→«близко» (Type 93)',g:'AUKUS-вектор',big:0,p1:3,p2:8,p3:7,p4:8,p5:8,p6:8,pr:'CETUS/Excalibur; Type 93 XLUUV (PME-регистрация до 31.03.2027); MMCM с FR',pl:'M Subs, BAE (Herne), Helsing (Плимут)',ch:'Type 93 PME; AUKUS Pillar 2',nt:'payload/автономия — без инкумбента'}]},
+{id:'fr',n:'Франция',fl:'🇫🇷',col:6,row:3,sph:'usnato',bud:'€57.1B → €76.3B к 2030; LPM €436B',p7:9,p8:9,p9:8,
+ segs:[
+ {s:'drones',m:'€1.2 млрд/год (LPM-дроны €8.4B/2024–30)',g:'MTO-парк ×4 к 2030',big:1,p1:7,p2:8,p3:8,p4:7,p5:6,p6:8,pr:'Damoclès 460; AKERON RCX50/RCH170; DURANDAL/DELUGE >$700M; COLROS; 10k «солдатских»',pl:'Delair, KNDS FR, MBDA, Thales, Harmattan ($1.4B юнкор)',ch:'AID-коллы; COLROS-маркет-инфо («на всё или часть»); соглашение с UA 18.11.2025 (перехватчики+компоненты)',nt:'офсетов нет с 2008; «qualifier en tirant» — 12 мес от контракта до поставки'},
+ {s:'cuas',m:'~€1 млрд/год (вся ПВО+LAD; «близко»)',g:'сенатское давление',big:0,p1:6,p2:8,p3:8,p4:8,p5:7,p6:8,pr:'LAD incr. 2.2 (PARADE); Rafale LADAC; Blaze (Origin) — первый серийный перехватчик; VIGIDRONE («LAD по подписке»)',pl:'CS Group, Thales, MBDA, CERBAIR, Origin/DSV',ch:'VIGIDRONE-панель (заявки до 2029); B2LT бесплатные полигоны; FREYJA с UA',nt:'рынок «особенно динамичный» (FOB); свежий сегмент'},
+ {s:'maritime',m:'«близко» с 2027 (€300–600M/год)',g:'PEM «drones navals»',big:0,p1:4,p2:9,p3:8,p4:5,p5:7,p6:5,pr:'PEM (06.2026); DANAE (3 финалиста, серия конец 2027); SLAM-F/MMCM (с UK); SDAM',pl:'Naval Group, Thales, SEAir, SeaOwl',ch:'⚠️ EU/EEA-only в тендере выносливости — только EU-фасад (JV с SeaOwl/SEAir)',nt:'DANAE: спрос (01.2025) → финалисты (10.2026) → серия (конец 2027)'}]},
+{id:'se',n:'Швеция',fl:'🇸🇪',col:7,row:1,sph:'usnato',bud:'GUTE II SEK 8.7B (04.2026) + C-UAS SEK 3.5B',p7:9,p8:9,p9:8,
+ segs:[{s:'cuas',m:'~$1.3–1.5B в 2026 (сумма пакетов)',g:'высокий',big:0,p1:5,p2:9,p3:8,p4:8,p5:8,p6:9,pr:'GUTE II; C-UAS 2026–28; дроны SEK 4B (01.2026)',pl:'Saab, вендоры НАТО',ch:'открытые НАТО-тендеры',nt:'региональный прецедент: Латвия купила BLAZE (Origin)'}]},
+{id:'no',n:'Норвегия',fl:'🇳🇴',col:6,row:1,sph:'usnato',bud:'NOK 6.5B дроны + $600M (Рамштайн)',p7:9,p8:9,p9:8,
+ segs:[{s:'drones',m:'~$0.6–1B/год (закупки UA/EU)',g:'высокий',big:0,p1:4,p2:8,p3:8,p4:9,p5:8,p6:9,pr:'NOK 6.5B на дроны UA/EU-производства; морские NOK 1.2B',pl:'Kongsberg, вендоры',ch:'прямые контракты с UA-производителями (модель «датская»)',nt:'якорный донор украинского ОПК'}]},
+{id:'nl',n:'Нидерланды',fl:'🇳🇱',col:6,row:2,sph:'usnato',bud:'C-UAS план €1.25–3.5B; Drone Line €300M',p7:9,p8:9,p9:7,
+ segs:[{s:'cuas',m:'~€0.5–1B/год (план)',g:'высокий',big:0,p1:4,p2:8,p3:8,p4:9,p5:8,p6:9,pr:'C-UAS-план (11.2025); 100 радаров Robin; «Линия дронов»',pl:'Robin Radar, вендоры',ch:'прямые контракты с UA-производителями; €248M UA+NL-дроны',nt:'модель «закупки для Украины как витрина»'}]},
+{id:'dk',n:'Дания',fl:'🇩🇰',col:7,row:2,sph:'usnato',bud:'обязательства DKK ~19B (2024–27) + «дрон-щит»',p7:9,p8:9,p9:8,
+ segs:[{s:'drones',m:'~$1B/год (модельные обязательства)',g:'высокий',big:0,p1:4,p2:8,p3:8,p4:9,p5:8,p6:10,pr:'«датская модель» (~$3B/200k+ дронов); «дрон-щит» из UA-технологий (11.11.2026)',pl:'вендоры UA/EU',ch:'прямое финансирование UA-ОПК',nt:'эталонная страна-донор'}]},
+{id:'fi',n:'Финляндия',fl:'🇫🇮',col:8,row:1,sph:'usnato',bud:'НАТО, восточный фланг',p7:9,p8:9,p9:8,segs:[]},
+{id:'ba',n:'Балтия',fl:'🇪🇪🇱🇻🇱🇹',col:10,row:2,sph:'usnato',bud:'Латвийская коалиция €2.75B обязательств',p7:9,p8:9,p9:8,
+ segs:[{s:'drones',m:'~$0.9B/год (коалиционные закупки у UA)',g:'высокий',big:0,p1:4,p2:8,p3:8,p4:9,p5:8,p6:10,pr:'Drone Capability Coalition (UK×LV): >215k дронов',pl:'UA-производители',ch:'коалиционные заказы напрямую',nt:'+ EW-граница с РФ'}]},
+{id:'es',n:'Испания',fl:'🇪🇸',col:5,row:4,sph:'usnato',bud:'€1.45B counter-drone из пакета €12B',p7:9,p8:9,p9:7,
+ segs:[{s:'cuas',m:'~€0.3–0.5B/год',g:'высокий',big:0,p1:3,p2:8,p3:7,p4:8,p5:8,p6:8,pr:'€1.45B counter-drone + €3.4B ПВО (11.2026)',pl:'Indra, вендоры',ch:'национальные тендеры',nt:''}]},
+{id:'it',n:'Италия',fl:'🇮🇹',col:7,row:4,sph:'usnato',bud:'unmanned €3.2B/~12 лет; SAFE €8B',p7:9,p8:9,p9:7,
+ segs:[{s:'cuas',m:'~€0.3B/год (5 031 APKWS $364M, 08.2026)',g:'поворот за год (инцидент в Латвии)',big:0,p1:3,p2:8,p3:7,p4:7,p5:8,p6:8,pr:'APKWS II $364M; LBA Systems (Leonardo×Baykar €2.4B JV)',pl:'Leonardo, LBA',ch:'только JV 50:50 (модель LBA); DevDroid прошёл испытания с IT-армией',nt:'15.04.2026 Мелони+Зеленский: курс на совместное производство дронов'}]},
+{id:'ua',n:'Украина',fl:'🇺🇦',col:10,row:3,sph:'ukraine',bud:'deftech $6.8B; ~10 млн дронов/год',p7:10,p8:10,p9:10,
+ segs:[
+ {s:'drones',m:'$6.3 млрд (+137%)',g:'+137% г/г',big:1,p1:10,p2:10,p3:10,p4:10,p5:6,p6:10,pr:'Brave1 ($1.39B заказы); DOT-Chain (>UAH 100B); цель 20 млн/год',pl:'500+ производителей',ch:'домашний рынок — полигон и источник данных',nt:'референс глобальной стратегии'},
+ {s:'cuas',m:'~$0.2–0.3 млрд (100k интерцепторов 2025)',g:'×8 мощностей 2026',big:0,p1:6,p2:10,p3:10,p4:10,p5:7,p6:10,pr:'33 000 сбитых/мес (03.2026); «Армія дронів.Бонус»',pl:'Wild Hornets, SkyFall, General Cherry, Strix Air',ch:'домашний',nt:''},
+ {s:'ew',m:'$220 млн (+215%)',g:'потребность 2026: $4.4B',big:0,p1:5,p2:10,p3:10,p4:10,p5:8,p6:10,pr:'30+ НАТО-кодификаций',pl:'Kvertus, Infozahyst, Falcons, NTC Cyqlone',ch:'домашний',nt:''},
+ {s:'ugv',m:'$252 млн (+488%)',g:'+488% г/г',big:0,p1:5,p2:10,p3:10,p4:10,p5:8,p6:10,pr:'22 000+ законтрактовано 2026; 31 398 миссий/мес',pl:'Ratel (→Swarmer $224M), Roboneers (→ARX), Tencore',ch:'домашний',nt:''}]},
+{id:'ru',n:'Россия',fl:'🇷🇺',col:12,row:1,sph:'russia',bud:'~10 000 дронов/мес производство',p7:2,p8:2,p9:2,
+ segs:[{s:'drones',m:'Geran ~2 000–4 000/мес; $70k/шт (90% локализация)',g:'jet-варианты 400–600 км/ч',big:1,p1:8,p2:8,p3:8,p4:1,p5:3,p6:1,pr:'Alabuga (подземные площади)',pl:'Alabuga, KZ-производители',ch:'❌ НЕ РЫНОК ВХОДА — драйвер бюджетов НАТО',nt:'октябрь-2026: 6 473 дальних запусков, сбито 75%'}]},
+{id:'by',n:'Беларусь',fl:'🇧🇾',col:11,row:3,sph:'russia',bud:'—',p7:2,p8:2,p9:2,segs:[]},
+{id:'tr',n:'Турция',fl:'🇹🇷',col:11,row:4,sph:'multiv',bud:'$27.3B (+30%); экспорт $10.05B (+48.8%)',p7:8,p8:6,p9:3,
+ segs:[
+ {s:'drones',m:'~$4 млрд/год (Baykar $2.5B, 88% экспорт)',g:'TAI к $12B к 2034',big:1,p1:8,p2:7,p3:8,p4:3,p5:3,p6:4,pr:'TCG ANADOLU+TB3; KIZILELMA на вооружении 2026; ANKA-3 серия',pl:'Baykar (№1 UCAV 3 года), TAI, STM',ch:'⚠️ вход закрыт; исторический канал двигателей (AI-450T) закрывается TEI',nt:'глобальный конкурент на Заливе/Африке/Балканах'},
+ {s:'cuas',m:'Steel Dome >$12B контрактов 2025–26',g:'Aselsan backlog >$30B',big:1,p1:8,p2:8,p3:9,p4:2,p5:3,p6:4,pr:'Steel Dome (4 эшелона); >100 систем в 2026',pl:'Aselsan, Roketsan, Havelsan',ch:'только RF/EO-модули в субконтракте',nt:'конкурент UA-РЭБ уже в Польше ($410M)'}]},
+{id:'il',n:'Израиль',fl:'🇮🇱',col:10,row:5,sph:'multiv',bud:'~$44.8B; экспорт $19.2B (+30%)',p7:9,p8:7,p9:3,
+ segs:[{s:'cuas',m:'≥$6–7 млрд/год (29% экспорта + $5.2B US-пакет)',g:'Arrow-ускорение после войны',big:1,p1:10,p2:8,p3:10,p4:2,p5:3,p6:1,pr:'HOMA; Or Eitan — первый оперативный лазер (12.2025); Hunter Eagle/Ghost Hunter',pl:'Rafael, IAI, Elbit ($7.9B), mPrest',ch:'❌ для UA закрыт с 2022 (вето на Iron Dome); Лапид (09.2026) обещает разворот',nt:'конкурент в Индии (~$10B пакет) и US Army (Hero-120 $982M)'}]},
+{id:'eg',n:'Египет',fl:'🇪🇬',col:9,row:6,sph:'neutral',bud:'~$2.5B (SIPRI); FMF $1.3B/год',p7:4,p8:5,p9:6,
+ segs:[{s:'cuas',m:'<$100M/год',g:'после удара по Дамиетте',big:0,p1:2,p2:7,p3:5,p4:6,p5:8,p6:6,pr:'Tolga $130M (Турция); EPF-тендер VTOL+радары',pl:'AOI, MKE',ch:'EU EPF-тендеры; US-fast-track',nt:'бюджет ограничен, кредитные схемы — низкий приоритет'}]},
+{id:'sa',n:'Саудовская Аравия',fl:'🇸🇦',col:10,row:6,sph:'gulf',bud:'$83.2B; на 2026 зарезервировано $5B+ C-UAS-поток',p7:9,p8:6,p9:2,
+ segs:[
+ {s:'cuas',m:'$5B+ поток 2026 (APKWS $1.96B ×10; PAC-3 $9B; KM-SAM $3.2B)',g:'+12% г/г; Bloomberg >$5B C-UAS Залива',big:1,p1:9,p2:10,p3:8,p4:8,p5:7,p6:9,pr:'слоёная ПВО; THAAD-локализация (Джидда); «Gold Dome СА» не существует',pl:'RTX, BAE, Baykar (Akinci ~$3B с SAMI, 70% лок. контент)',ch:'⚠️ Г2Г подписано (26–27.03.2026, 10 лет); первый контракт UA-перехватчиков через посредника; WSJ: «перехватчики + РЭБ»',nt:'GAMI IPP: ≥60% Industrial Participation для ≥$40M; дефицит PAC-3 (восполнение до 30 мес) = окно 2026–28'},
+ {s:'drones',m:'рынок UAV $13.54B (№4 мира; $9.18B пайплайн)',g:'рост (SKYWASP впервые в бою 09.2026)',big:1,p1:8,p2:7,p3:7,p4:6,p5:5,p6:7,pr:'Akinci-локализация; Drone National Team нет',pl:'Baykar, AVIC, GA-ASI, EDGE',ch:'SAMI-модель (Baykar-прецедент)',nt:'ниша — массовые дешёвые платформы'},
+ {s:'maritime',m:'<$1B (стратегический приоритет)',g:'ускорение (хуситы)',big:0,p1:3,p2:9,p3:7,p4:8,p5:9,p6:9,pr:'многонац. морская коалиция 43 стран (СА-штаб); SAMI+ULAQ; MASNA $150M USV-приоритет',pl:'ULAQ, L3Harris+Zamil',ch:'морские дроны — во всех трёх сделках Залива; «чёрноморский коридор» для Hormuz',nt:'ставка 2027+; конкуренция низкая'}]},
+{id:'ae',n:'ОАЭ',fl:'🇦🇪',col:11,row:6,sph:'gulf',bud:'~$27B; >$8B за полгода войны',p7:9,p8:6,p9:4,
+ segs:[{s:'cuas',m:'$3.1B+ 2026 (FS-LIDS $2.1B с waiver + APKWS $1.04B)',g:'EDGE в 3 смены',big:1,p1:9,p2:10,p3:8,p4:7,p5:6,p6:8,pr:'EDGE soft-kill (80–85% перехватов, заявка); SHADOW 3/VORTEX-E; Omen (Anduril JV $200M)',pl:'EDGE ($5.06B выручка), Anduril, RTX (Coyote в ОАЭ), Powerus ($5k Guardian)',ch:'Drone Deal (10 лет); контрактное производство (Powerus-модель 30→100/день); TAF-запрос 5 000 Octopus',nt:'окно для не-американцев сжимается — дифференцироваться от SHADOW 3'}]},
+{id:'qa',n:'Катар',fl:'🇶🇦',col:11,row:5,sph:'gulf',bud:'~$17B; импорт +127% (SIPRI)',p7:10,p8:7,p9:6,
+ segs:[{s:'cuas',m:'~$5B 2026 (FS-LIDS $1B + replenishment $4.99B + LIDS $729M)',g:'«Speedy Air Defense Procurement»',big:1,p1:8,p2:10,p3:7,p4:8,p5:7,p6:9,pr:'радары GM200/GM400α; Barzan C-UAS; Gobi Tempest (Harmattan MoU, оценка)',pl:'RTX, Barzan, Harmattan/Dassault',ch:'⚠️ единственный опубликованный текст соглашения с UA (до 28.03.2036); Barzan «демо→оценка→закупка»; TAF-запрос 2 000 Octopus',nt:'самый прозрачный рынок Залива'}]},
+{id:'ir',n:'Иран',fl:'🇮🇷',col:12,row:5,sph:'russia',bud:'Shahed-лицензия РФ $1.75B',p7:2,p8:2,p9:2,
+ segs:[{s:'drones',m:'>200 планеров/мес',g:'—',big:0,p1:5,p2:5,p3:5,p4:1,p5:3,p6:1,pr:'HESA/Qods',pl:'HESA',ch:'❌ НЕ РЫНОК ВХОДА; с 2026 РФ экспортирует Geran обратно в Иран',nt:'драйвер Gulf-спроса'}]},
+{id:'in',n:'Индия',fl:'🇮🇳',col:13,row:6,sph:'multiv',bud:'₹7.85 lakh cr (~$90B+); acquisition +24%',p7:7,p8:6,p9:2,
+ segs:[
+ {s:'drones',m:'$0.8–1.9B/год (разброс ×3) + MQ-9B $3.5B',g:'12–24% CAGR',big:1,p1:7,p2:8,p3:8,p4:4,p5:6,p6:6,pr:'87 MALE-тендер (60% IC!); DAC 26.10.2026: ₹2.12 lakh cr AoN; Tata+NIBE 840 лоитеринг',pl:'HAL, BEL, Adani-Elbit (Hermes 900), Alpha, ideaForge',ch:'⚠️ импорт готовых дронов запрещён (2022); iDEX закрыт для ин. большинства → Adani-модель (инд. мажоритарий)',nt:'2 крушения Drishti-10 за 18 мес — окно для альтернатив'},
+ {s:'components',m:'дрон-рынок ~$1B+; импорт компонентов СВОБОДЕН',g:'быстрый (армия рвёт «китайские» контракты)',big:0,p1:4,p2:8,p3:7,p4:8,p5:8,p6:8,pr:'«Bharat Drone Stack»: 208 поставщиков, моторов 32, магнитов 0; PLI',pl:'Tonbo, Astra',ch:'⭐ САМЫЙ ПРЯМОЙ сегмент: секретарь MoD просит у Европы трансфер payloads/sensors',nt:'китайские контроли 18.11.2026 усиливают спрос на «не-Китай»'},
+ {s:'cuas',m:'раскрыто ~$45M; pipeline >$2B',g:'ускорение (Sindoor)',big:0,p1:4,p2:8,p3:7,p4:6,p5:8,p6:6,pr:'DRDO D4 (BEL); AKASH TARANG (anti-UAV EW); DAC-пакеты ₹52 000 cr',pl:'BEL, Zen, BBBS',ch:'DAC Buy (Global) ≥$240M с офсетами',nt:'фрагментированный (60 систем/43 производителя)'},
+ {s:'maritime',m:'multi-year pipeline >$10B (12 MCMV ≈$5B; CASCADE)',g:'AoN→контракты',big:0,p1:4,p2:8,p3:7,p4:4,p5:7,p6:5,pr:'Project CASCADE (Make-II — прототип за счёт индустрии!)',pl:'Sagar, Accurate, L&T, GRSE',ch:'только полезные нагрузки/автономия индийским bidder’ам',nt:''}]},
+{id:'cn',n:'Китай',fl:'🇨🇳',col:13,row:4,sph:'china',bud:'~$296B (SIPRI)',p7:7,p8:5,p9:1,
+ segs:[
+ {s:'drones',m:'военные $4.93B (10.4% мира); весь рынок $15.6–25B; экспорт $3.12B (+45%)',g:'9.7% CAGR',big:1,p1:10,p2:6,p3:9,p4:1,p5:2,p6:1,pr:'military-civil fusion; UCAV в ~17 стран + 2 сборочные линии',pl:'AVIC (Wing Loong), CASC (CH), DJI (~70% гражд. рынка), Ziyan',ch:'❌ НЕ РЫНОК ВХОДА — конкурент №1 на третьих рынках',nt:'MOFCOM №49 с 18.11.2026: лицензии на автопилоты/моторы/рой/турбоприpets'},
+ {s:'ew',m:'$3.09B',g:'5.66%',big:1,p1:9,p2:5,p3:8,p4:1,p5:2,p6:1,pl:'CETC (лидер)',pr:'—',ch:'❌',nt:''},
+ {s:'components',m:'>$8–10B выпуска: 60% мировых тепловых сенсоров; >50% волокна; ~90% РЗЭ-магнитов',g:'контроли как оружие (цены волокна ×6–10)',big:1,p1:10,p2:6,p3:9,p4:1,p5:2,p6:1,pr:'контроли MOFCOM 2023→2026; 40 AI-технологий к ограничению',pl:'Raytron, Guide, HIKMICRO, DJI-экосистема',ch:'❌; для мира — источник ценового риска и повод «де-китаизации»',nt:'главный фактор себестоимости западных дронов'}]},
+{id:'kp',n:'КНДР',fl:'🇰🇵',col:14,row:3,sph:'russia',bud:'Shahed-технология от РФ',p7:2,p8:2,p9:2,
+ segs:[{s:'drones',m:'серийные камикадзе (цеха показаны 09.2026)',g:'Ким: «абсолютное превосходство» (29.10.2026)',big:0,p1:4,p2:8,p3:7,p4:1,p5:3,p6:1,pr:'Saebyeol-4/9 (копии GH/Predator)',pl:'Panghyon',ch:'❌ НЕ РЫНОК — драйвер KR/JP C-UAS',nt:''}]},
+{id:'kr',n:'Юж. Корея',fl:'🇰🇷',col:15,row:3,sph:'indopac',bud:'KRW 73.28 трлн (~$53.5B), +8.2%',p7:9,p8:9,p9:4,
+ segs:[
+ {s:'drones',m:'$0.5–0.85B/год (>$1B к ~2030)',g:'11–15% CAGR; дроны «основное боевое средство»',big:0,p1:4,p2:9,p3:9,p4:5,p5:5,p6:7,pr:'Big Bang (26.06.2026): >20k одноразовых к 2030, 60k учебных, 500k «drone warriors»; K-LUCAS',pl:'KAI, Korean Air, LIG Nex1, Hanwha',ch:'K-BLUE-сертификация; лицензия Hanwha/LIG Nex1 (их экспорт усиливается UA-опытом)',nt:'«узкое горлышко» бюджетов для ~90 местных разработчиков'},
+ {s:'cuas',m:'~$0.6B/год + K2-программа $2.4B (2028–46)',g:'+18.8% бюджета',big:0,p1:4,p2:9,p3:9,p4:5,p5:6,p6:7,pr:'hard-kill перехватчик ₩17B rapid demo; Laser Block-I (100% на тестах)',pl:'Hanwha, LIG Nex1, ADD',ch:'rapid demonstration; K-BLUE; Bullfrog (ACS, US) — прецедент иностранца',nt:'офсеты ≥$10M/30%, но мультипликатор ×5 за SME-работу'}]},
+{id:'jp',n:'Япония',fl:'🇯🇵',col:16,row:3,sph:'indopac',bud:'>¥9 трлн (~$58B); 2% ВВП достигнуты',p7:9,p8:9,p9:9,
+ segs:[
+ {s:'drones',m:'строка «Unmanned Defense Capabilities» FY2026: ¥277B (~$1.9B, все домены)',g:'+150% г/г',big:1,p1:7,p2:10,p3:9,p4:10,p5:8,p6:9,pr:'DBP ¥43 трлн/5 лет; SHIELD $640M (импортозависимый старт!); 17 MQ-9B ¥292B (FY27); MOD SBIR: малый ударный UAV',pl:'GA-ASI, MHI, KHI, ACSL (30k/год), Terra Drone',ch:'⭐ прямые ATLA-тендеры (иностранцы выигрывают: Terra Drone обошла Quantum/DZYNE); Rakuten–Brave1 MoU; офсетов НЕТ',nt:'цикл «тендер→поставка» ~2 месяца — самый быстрый в мире; отмена «five category rule» (04.2026)'},
+ {s:'cuas',m:'$0.1–0.3B («близко»)',g:'15–25% CAGR',big:0,p1:4,p2:9,p3:8,p4:10,p5:8,p6:9,pr:'интерцепторы: 38 заявок → контракт 25.08.2026 → поставка с 09.2026; FY27 ¥7.6B; лазер MHI 10 кВт; HPM',pl:'Terra Drone, ACSL, Toshiba, MHI, Epirus',ch:'ATLA-тендеры; Quantum Systems уже в PoC (Early Acquisition Program)',nt:'лучший рынок Азии для быстрой монетизации/референса'},
+ {s:'ew',m:'~¥150–200B/год («близко», декомпозиции нет)',g:'умеренный',big:0,p1:5,p2:7,p3:7,p4:6,p5:5,p6:6,pr:'NEWS ¥8.8B; EC-2/XEC-2 (KHI); stand-in jammer (Fujitsu)',pl:'KHI, MHI, Fujitsu, NEC',ch:'модули праймам (NDA-режим)',nt:''}]},
+{id:'tw',n:'Тайвань',fl:'🇹🇼',col:15,row:4,sph:'indopac',bud:'NT$1.12 трлн (~$31–35B, 3% ВВП, +16–18%)',p7:9,p8:7,p9:5,
+ segs:[
+ {s:'drones',m:'$1.68B заказ ОДНОГО года (48 750 БпЛА, 07.2025); каркас NT$240B/6 лет',g:'закупки 3 422 (2024) → 48 750 (2025); 180k/год к 2028',big:1,p1:7,p2:10,p3:9,p4:6,p5:7,p6:7,pr:'«Drone National Team»; TEDIBOA (200+ компаний); требование 2026: 210 000 береговых + 1 320 USV; NDAA US: $1B TSCI',pl:'NCSIST, AIDC, Thunder Tiger, GEOSAT (NDAA-compliant)',ch:'co-production с NCSIST (прецеденты Anduril/AeroVironment/Kratos/Shield AI); DSET рекомендует UA-кооперацию',nt:'крупнейший поставщик дронов В УКРАИНУ (122 726 ед. 2025, ×35) — обратный поток технологий'},
+ {s:'ew',m:'нет данных (вероятно <$1B)',g:'высокий спрос',big:0,p1:3,p2:9,p3:6,p4:8,p5:9,p6:8,pr:'⚠️ АУДИТ-2026: NCSIST НЕ ВИДИТ 5.1 ГГц (частота PLA), Beidou-3, оптоволокно, ИИ-наведение',pl:'NCSIST, Cub Elecparts',ch:'⭐ точечное предложение UA-решений против fiber/AI-угроз',nt:'провал аудита = прямой слот для украинской детекции'},
+ {s:'maritime',m:'1 320 ударных USV (требование 2026)',g:'с нуля → серийные требования',big:0,p1:3,p2:9,p3:6,p4:6,p5:8,p6:6,pr:'Kuai-Chi (NCSIST); NCSIST×Anduril Dive-LD',pl:'NCSIST, Lungteh, Thunder Tiger',ch:'перенос Sea Baby/MAGURA-опыта через NCSIST-партнёрство',nt:''}]},
+{id:'au',n:'Австралия',fl:'🇦🇺',col:16,row:8,sph:'indopac',bud:'A$63.4B → A$112B к 2035 (3% ВВП)',p7:9,p8:9,p9:6,
+ segs:[
+ {s:'cuas',m:'~A$3.7B/год суммарно (counter-drone A$7B/10л + missile defence A$30B/10л)',g:'+100% к текущему CUAS-финансированию',big:1,p1:7,p2:9,p3:9,p4:6,p5:7,p6:8,pr:'NDS/IIP-2026; AIR6502 (MRGBAD); «kill web» с США; два стартовых Aussie-made контракта',pl:'BAE AU, Austal, Insitu Pacific, Anduril AU',ch:'AU-юрлицо/партнёр (AIC); Австралия в Drone Coalition для UA (прецедент DefendTex)',nt:'«уроки Украины» официально декларируются'},
+ {s:'drones',m:'MQ-28 Ghost Bat >A$2.4B суммарно; Switchblade-300 ~300',g:'08.12.2025: первый в мире AIM-120 с лоял-визинга; IOC 2028',big:1,p1:6,p2:9,p3:8,p4:5,p5:5,p6:7,pr:'DEF 6014 (суверенная); Wellcamp-производство',pl:'Boeing AU (монополист лоял-визинга), BAE AU, NIOA×AeroVironment',ch:'attritable-UAS тендеры через AU-партнёра',nt:'MQ-9B отменён (2022) — не ориентироваться'},
+ {s:'maritime',m:'Ghost Shark A$1.7B («dozens» XL-AUV); Bluebottle 15→55 USV; undersea A$130B/10л',g:'от прототипа к Program of Record за 3 года',big:1,p1:7,p2:9,p3:9,p4:6,p5:7,p6:6,pr:'Ghost Shark (Anduril AU + DSTG, US Navy заказал прототип); AUKUS undersea',pl:'Anduril AU (40+ локальных поставщиков), Ocius, BAE (Herne)',ch:'через AU-партнёра/Anduril-цепочку; AUKUS Pillar 2 = только US/UK/AU',nt:'UA-USV-опыт трансферабелен через коалицию'}]},
+{id:'sg',n:'Сингапур',fl:'🇸🇬',col:13,row:7,sph:'indopac',bud:'~$19.7B (3% ВВП)',p7:9,p8:9,p9:6,
+ segs:[{s:'cuas',m:'<$1B',g:'создана Counter-UAS Group (03.2025)',big:0,p1:3,p2:7,p3:7,p4:7,p5:8,p6:8,pr:'DIS (4-й вид ВС); MRCV-«матки» (6 кораблей)',pl:'ST Engineering',ch:'пилотные продажи; региональный хаб через ST Engineering',nt:'приоритет низкий, ценность — хаб'}]},
+{id:'vn',n:'Вьетнам',fl:'🇻🇳',col:14,row:6,sph:'neutral',bud:'<$1B все сегменты',p7:6,p8:5,p9:5,segs:[]},
+{id:'id',n:'Индонезия',fl:'🇮🇩',col:14,row:7,sph:'neutral',bud:'<$1B все сегменты',p7:6,p8:5,p9:5,segs:[]},
+{id:'br',n:'Бразилия',fl:'🇧🇷',col:3,row:6,sph:'neutral',bud:'<$1B все сегменты',p7:6,p8:6,p9:6,segs:[]}
+];
+
+const W={p1:.20,p2:.15,p3:.15,p4:.15,p5:.10,p6:.10,p7:.05,p8:.05,p9:.05};
+function score(country,seg){const c=country,p=seg;
+  return (W.p1*p.p1+W.p2*p.p2+W.p3*p.p3+W.p4*p.p4+W.p5*p.p5+W.p6*p.p6+W.p7*c.p7+W.p8*c.p8+W.p9*c.p9);}
+function fmt(x){return x.toFixed(2)}
+C.forEach(c=>{c.segs.forEach(s=>s.score=score(c,s));c.best=c.segs.length?Math.max(...c.segs.map(s=>s.score)):null;});
+let activeSeg='all', mode='spheres', selected=null;
+
+// pills
+const pills=document.getElementById('pills');
+const segBtns=[{k:'all',n:'🌍 Все сегменты'}].concat(Object.keys(SEG).map(k=>({k,n:SEG[k].n,c:SEG[k].c})));
+segBtns.forEach(b=>{const el=document.createElement('span');el.className='pill'+(b.k==='all'?' all':'')+(b.k==='all'?' active':'');
+ el.textContent=b.n;el.onclick=()=>{activeSeg=b.k;document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');render();};pills.appendChild(el);});
+const modeBox=document.createElement('div');modeBox.className='mode';
+[['spheres','Сферы влияния'],['score','Скоринг входа']].forEach(([k,n])=>{const b=document.createElement('button');b.textContent=n;if(k==='spheres')b.classList.add('active');
+ b.onclick=()=>{mode=k;modeBox.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');render();};modeBox.appendChild(b);});
+pills.appendChild(modeBox);
+
+function heatColor(v){return v>=7.5?'var(--hi)':v>=6.5?'var(--mid)':v>=5.5?'var(--low)':'var(--vlow)';}
+function verdict(v){return v>=7.5?['ПРИОРИТЕТНЫЙ','hi']:v>=6.5?['ПЕРСПЕКТИВНЫЙ','mid']:v>=5.5?['ТАКТИЧЕСКИЙ','low']:['МОНИТОРИНГ','vlow'];}
+
+const grid=document.getElementById('grid');
+function tileStyle(c){return `grid-column:${c.col};grid-row:${c.row};`;}
+function tileBG(c){
+ if(mode==='score'&&c.best!=null)return heatColor(c.best);
+ return SPH[c.sph].c;
+}
+function render(){
+ grid.innerHTML='';
+ C.forEach(c=>{
+  const segs=activeSeg==='all'?c.segs:c.segs.filter(s=>s.s===activeSeg);
+  const has=segs.length>0;
+  const t=document.createElement('div');
+  t.className='tile'+(activeSeg!=='all'&&!has?' dim':'')+(selected===c.id?' bigsel':'');
+  t.style.cssText=tileStyle(c);
+  if(!has&&activeSeg!=='all'){t.style.opacity='.22';}
+  if(has||activeSeg==='all'){
+    const bg=tileBG(c);
+    t.style.background=bg;t.style.borderColor='rgba(255,255,255,.25)';
+    if(activeSeg!=='all'){const sc=segs[0].score;
+      t.style.background=heatColor(sc);
+      if(segs[0].big)t.style.boxShadow='inset 0 0 0 2px #fff';
+    }
+  }
+  const bigCount=c.segs.filter(s=>s.big).length;
+  let inner=`<span class="fl">${c.fl}</span><span class="nm">${c.n}</span>`;
+  if(c.best!=null&&(activeSeg==='all'||has))inner+=`<span class="bd">${activeSeg==='all'?fmt(c.best):fmt(segs[0].score)}</span>`;
+  else inner+=`<span class="bd">—</span>`;
+  if(bigCount>0&&activeSeg==='all')inner=`<span class="b1">${bigCount}×$1B+</span>`+inner;
+  t.innerHTML=inner;
+  t.onclick=()=>{selected=c.id;render();showPanel(c);};
+  grid.appendChild(t);
+ });
+}
+function showPanel(c){
+ const p=document.getElementById('panel');
+ let h=`<h2>${c.fl} ${c.n}</h2>
+ <span class="sphere" style="background:${SPH[c.sph].c}">${SPH[c.sph].n}</span>
+ <div class="meta"><b>Оборонный бюджет:</b> ${c.bud}<br>
+ <b>Контекст:</b> платёжность P7=${c.p7} · альянсы P8=${c.p8} · офсеты/локализация P9=${c.p9}</div>`;
+ if(!c.segs.length)h+=`<div class="seg"><div class="note">Нет сегментов выше порога анализа — рынок периферийный/мониторинг. Полные данные — <b>04_страновые_профили.md</b>.</div></div>`;
+ c.segs.forEach(s=>{
+  const [vt,vc]=verdict(s.score);
+  h+=`<div class="seg">
+   <div class="sh"><span class="sn" style="color:${SEG[s.s].c}">${SEG[s.s].n}${s.big?' 🔶':''}</span><span class="ss" style="background:${heatColor(s.score)}">${fmt(s.score)}</span></div>
+   <div class="kv"><span>Объём: <b>${s.m}</b></span></div>
+   <div class="kv"><span>Рост: <b>${s.g}</b></span></div>
+   ${s.pr?`<div class="kv"><span>Программы: <b>${s.pr}</b></span></div>`:''}
+   ${s.pl?`<div class="kv"><span>Игроки: <b>${s.pl}</b></span></div>`:''}
+   ${s.ch?`<div class="kv"><span>Канал входа: <b>${s.ch}</b></span></div>`:''}
+   ${s.nt?`<div class="note">${s.nt}</div>`:''}
+   <div class="note">Вердикт: <span class="tagv ${vc}">${vt}</span> · P1=${s.p1} P2=${s.p2} P3=${s.p3} P4=${s.p4} P5=${s.p5} P6=${s.p6}${s.big?' · сегмент ≥$1B/год':''}</div>
+  </div>`;
+ });
+ p.innerHTML=h;
+}
+// legend
+const lg=document.getElementById('legend');
+Object.keys(SPH).forEach(k=>{const d=document.createElement('span');d.className='leg';d.innerHTML=`<i style="background:${SPH[k].c}"></i>${SPH[k].n}`;lg.appendChild(d);});
+const hint=document.createElement('div');hint.className='hint';
+hint.innerHTML='Клик по стране — карточка сегментов с баллами. Выбор сегмента (пилюли) подсвечивает страны с этим сегментом: цвет = балл входа, белая рамка = сегмент ≥$1 млрд/год. Веса и шкалы — в 00_методология_и_скоринг.md.';
+lg.appendChild(hint);
+// ranking table
+const rows=[];
+C.forEach(c=>c.segs.forEach(s=>rows.push({cn:c.n,fl:c.fl,sg:SEG[s.s].n,sc:s.score,big:s.big,se:s.s})));
+rows.sort((a,b)=>b.sc-a.sc);
+function renderRank(sortKey){
+ const tb=document.getElementById('rank');
+ let h=`<tr><th data-k="idx">#</th><th data-k="cn">Страна</th><th data-k="sg">Сегмент</th><th data-k="sc">Балл</th><th data-k="vd">Вердикт</th></tr>`;
+ let arr=rows.slice();
+ if(sortKey==='cn')arr.sort((a,b)=>a.cn.localeCompare(b.cn));
+ else if(sortKey==='sg')arr.sort((a,b)=>a.sg.localeCompare(b.sg));
+ else arr.sort((a,b)=>b.sc-a.sc);
+ arr.forEach((r,i)=>{const [vt,vc]=verdict(r.sc);
+  h+=`<tr><td>${i+1}</td><td class="cn">${r.fl} ${r.cn}</td><td>${r.sg}${r.big?' 🔶':''}</td><td><b>${fmt(r.sc)}</b></td><td><span class="tagv ${vc}">${vt}</span></td></tr>`;});
+ tb.innerHTML=h;
+ tb.querySelectorAll('th').forEach(th=>th.onclick=()=>renderRank(th.dataset.k));
+}
+renderRank('sc');
+render();
+showPanel(C.find(c=>c.id==='us'));
+</script>
+</body>
+</html>
