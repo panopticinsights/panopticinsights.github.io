@@ -1,6 +1,6 @@
-# P1-SUN — BOM (Components Specification)
+# P1-SUN: components specification
 
-**Family:** FPV Kamikaze / Interceptor (wing/quad 1–10 kg)
+**Family:** FPV Kamikaze/Interceptor (wing/quad 1–10 kg)
 **Manufacturer:** SkyFall
 **Status:** Fielded
 **Sourcing date:** 2026-11-23 (prices/availability verified on this date)
@@ -11,11 +11,15 @@
 >
 > SkyFall overview: SkyFall, founded in 2022, is one of Ukraine's largest drone makers. Its P1-SUN interceptor entered combat in November 2025 and, according to the company, has destroyed more than 5,500 Russian drones. In July 2026 SkyFall unveiled the P1-SUN JetKiller at Farnborough: a 370 km/h version built to catch Russia's new jet-powered drones, which shot down its first Geran-5 in late September 2026. The company says it can build up to 50,000 interceptors a month, and in June 2026 it signed a memorandum with Airbus Defence and Space on linking P1-SUN to Airbus command-and-control software. On 9 October 2026 Japan's Defense Minister Shinjiro Koizumi announced that his ministry had signed a contract to buy SkyFall interceptor drones; the model, quantity and value were not disclosed. In November 2026 SkyFall and the US avionics company Auterion announced a joint venture to build drones for Ukraine at a new German-funded factory in Germany, starting with Shrike FPV drones and later adding P1-SUN; the partners say they have already delivered more than 50,000 Shrike drones together.
 >
-> Sources — Defender Media, 20 Nov 2026 — Kyiv Independent, Jul 2026 — Breaking Defense, Jul 2026 — Forbes Ukraine via Euromaidan Press, 24 Apr 2026 — Defender Media, 10 Oct 2026 — Militarnyi, 10 Oct 2026
+**Sources:** <br>
+— Defender Media, 20 Nov 2026. <br>
+— Kyiv Independent, Jul 2026. <br>
+— Breaking Defense, Jul 2026. <br>
+— Forbes Ukraine via Euromaidan Press, 24 Apr 2026. <br>
+— Defender Media, 10 Oct 2026. <br>
+— Militarnyi, 10 Oct 2026. <br>
 >
 > Public figures as reported by the company and the press, with dates. Independent verification is part of our vetting process and is shared with counterparties under NDA.
->
-> More from the ecosystem: view all 162 companies → Sting Anti-Shahed Interceptor Drone
 
 ## BOM — node level (FPV Kamikaze/Interceptor (wing/quad 1–10 kg), family reference)
 
@@ -81,7 +85,8 @@
 
 ---
 
-For further information about the products, please contact us using the details provided:
+## For more information about this or other products, please contact us: 
 
-Session: 057a9aa43e25a8fb684ce9e0d7a766ee33430e2ea5c247a3bc1a42d9bd08ec8d4f
-Threema: 2MCXH9UB
+**Session**: 057a9aa43e25a8fb684ce9e0d7a766ee33430e2ea5c247a3bc1a42d9bd08ec8d4f
+
+**Threema**: 2MCXH9UB
